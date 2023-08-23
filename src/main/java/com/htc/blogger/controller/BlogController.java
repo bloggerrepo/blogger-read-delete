@@ -1,0 +1,84 @@
+package com.htc.blogger.controller;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.htc.blogger.CustomException.ResourceNotFoundException;
+import com.htc.blogger.entity.Blog;
+import com.htc.blogger.repo.BlogRepository;
+
+@RestController
+@RequestMapping("/api")
+public class BlogController {
+
+	@Autowired
+	BlogRepository blogRepository;
+
+	@GetMapping("/blogs")
+	public List<Blog> getAllBlogs() {
+		return blogRepository.findAll();
+	}
+
+	@PostMapping("/blog")
+	public Blog createBlog(@RequestBody Blog blog) {
+		if (blog.getCreatedAt() == null)
+			blog.setCreatedAt(LocalDateTime.now());
+		return blogRepository.save(blog);
+	}
+
+	@GetMapping("/blog/{id}")
+	public Blog getBlogById(@PathVariable(value = "id") Long blogId) {
+		return blogRepository.findById(blogId).orElseThrow(() -> new ResourceNotFoundException("Blog", "id", blogId));
+	}
+
+	@PutMapping("/blog/{id}")
+	public Blog updateBlog(@PathVariable(value = "id") Long blogId, @RequestBody Blog blogDetails) {
+
+		Blog blog = blogRepository.findById(blogId)
+				.orElseThrow(() -> new ResourceNotFoundException("Blog", "id", blogId));
+
+		blog.setTitle(blogDetails.getTitle());
+		blog.setContent(blogDetails.getContent());
+		blog.setAuthorId(blogDetails.getAuthorId());
+		blog.setUpdatedAt(LocalDateTime.now());
+
+		Blog updatedBlog = blogRepository.save(blog);
+		return updatedBlog;
+	}
+
+	@DeleteMapping("/blog/{id}")
+	public ResponseEntity<?> deleteBlog(@PathVariable(value = "id") Long blogId) {
+		Blog blog = blogRepository.findById(blogId)
+				.orElseThrow(() -> new ResourceNotFoundException("Blog", "id", blogId));
+
+		blogRepository.delete(blog);
+
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/get")
+	public Blog dummyComment() {
+		Blog blog=new Blog();
+		blog.setId(3L);
+		blog.setTitle("Java");
+		blog.setContent("Practice Everyday");
+		blog.setCreatedAt(LocalDateTime.now());
+		blog.setUpdatedAt(LocalDateTime.now());
+		blog.setAuthorId(5L);
+
+		return blog;
+
+	}
+
+}
