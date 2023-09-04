@@ -3,6 +3,8 @@ package com.htc.blogger.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,11 +26,9 @@ public class BlogController {
 
 	@Autowired
 	BlogRepository blogRepository;
+	private static final Logger logger=LoggerFactory.getLogger(BlogController.class);
 
-	@GetMapping("/blogs")
-	public List<Blog> getAllBlogs() {
-		return blogRepository.findAll();
-	}
+
 
 	@PostMapping("/blog")
 	public Blog createBlog(@RequestBody Blog blog) {
@@ -39,6 +39,8 @@ public class BlogController {
 
 	@GetMapping("/blog/{id}")
 	public Blog getBlogById(@PathVariable(value = "id") Long blogId) {
+		logger.info("get blog by id : "+blogId);
+		
 		return blogRepository.findById(blogId).orElseThrow(() -> new ResourceNotFoundException("Blog", "id", blogId));
 	}
 
@@ -59,6 +61,9 @@ public class BlogController {
 
 	@DeleteMapping("/blog/{id}")
 	public ResponseEntity<?> deleteBlog(@PathVariable(value = "id") Long blogId) {
+		
+		logger.info("deleteblog {}",blogId);
+		
 		Blog blog = blogRepository.findById(blogId)
 				.orElseThrow(() -> new ResourceNotFoundException("Blog", "id", blogId));
 
@@ -67,18 +72,16 @@ public class BlogController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/get")
-	public Blog dummyComment() {
-		Blog blog=new Blog();
-		blog.setId(3L);
-		blog.setTitle("Java");
-		blog.setContent("Practice Everyday");
-		blog.setCreatedAt(LocalDateTime.now());
-		blog.setUpdatedAt(LocalDateTime.now());
-		blog.setAuthorId(5L);
+	/*
+	 * @GetMapping("/get") public Blog dummyComment() { Blog blog=new Blog();
+	 * blog.setId(3L); blog.setTitle("Java"); blog.setContent("Practice Everyday");
+	 * blog.setCreatedAt(LocalDateTime.now());
+	 * blog.setUpdatedAt(LocalDateTime.now()); blog.setAuthorId(5L);
+	 * 
+	 * return blog;
+	 * 
+	 * }
+	 */
 
-		return blog;
-
-	}
 
 }
